@@ -3,7 +3,10 @@
     <p class="top-title">TOP (予定一覧表示)</p>
   </div>
   <div class="main-area">
-    <FilterList :filterStatus="filterStatus"></FilterList>
+    <FilterList
+      :filterStatus="filterStatus"
+      @changeFilter="changeFilter"
+    ></FilterList>
     <div class="flex justify-center">
       <ul class="todo-list">
         <li class="flex justify-end">
@@ -13,7 +16,7 @@
         </li>
         <li v-if="!todoList.length">登録されている予定はありません。</li>
         <li v-for="todo in todoList" :key="todo.id">
-          <TodoList :todo="todo"></TodoList>
+          <TodoList :todo="todo" @updateStatus="updateStatus"></TodoList>
         </li>
       </ul>
     </div>
@@ -22,8 +25,8 @@
 <script lang="ts" setup>
 import FilterList from "@/components/FilterList.vue";
 import TodoList from "@/components/TodoList.vue";
-import { ref } from "vue";
 import { Todo } from "@/interface/todo";
+import { ref } from "vue";
 
 const dataList = ref<Todo[]>(
   JSON.parse(window.localStorage.getItem("todoList") ?? "")
@@ -51,12 +54,39 @@ const todoList = ref<Todo[]>(
  * @param {number} id
  * @param {number} status
  */
+const updateStatus = (id: number, status: number) => {
+  let todo: Todo | undefined = dataList.value.find((todo) => todo.id === id);
+  if (todo !== undefined && status < 2) {
+    todo.status = status + 1;
+    const index = dataList.value.findIndex((todo) => todo.id === id);
+    dataList.value[index] = todo;
+    window.localStorage.setItem("todoList", JSON.stringify(dataList.value));
+    changeFilter(filterStatus.value);
+  }
+};
 
 /**
  * フィルターの更新処理
  *
  * @param {string} status
  */
+const changeFilter = (status: string) => {
+  filterStatus.value = status;
+  todoList.value = dataList.value;
+  todoList.value.sort(function (a, b) {
+    if (a.status > b.status) return 1;
+    if (a.status < b.status) return -1;
+
+    if (a.endDate > b.endDate) return 1;
+    if (a.endDate < b.endDate) return -1;
+    return 0;
+  });
+  if (Number(status) !== 3) {
+    todoList.value = todoList.value.filter(
+      (todo) => todo.status === Number(status)
+    );
+  }
+};
 </script>
 <style lang="postcss" scoped>
 .top-area {

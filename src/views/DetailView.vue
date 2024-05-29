@@ -5,7 +5,12 @@
     </div>
     <div class="main-area">
       <div class="my-5">
-        <input class="w-[500px]" placeholder="タイトル" type="text" />
+        <input
+          class="w-[500px]"
+          placeholder="タイトル"
+          type="text"
+          v-model="title"
+        />
       </div>
       <div class="my-5">
         <textarea
@@ -13,24 +18,25 @@
           placeholder="内容"
           cols="30"
           rows="10"
+          v-model="description"
         ></textarea>
       </div>
       <div class="flex justify-between my-5">
-        <input class="w-[230px]" type="date" />
+        <input class="w-[230px]" type="date" v-model="startDate" />
         <p>~</p>
-        <input class="w-[230px]" type="date" />
+        <input class="w-[230px]" type="date" v-model="endDate" />
       </div>
       <div class="my-5">
-        <button class="update-button">更新</button>
-        <button class="delete-button">削除</button>
+        <button class="update-button" @click="updateTodo">更新</button>
+        <button class="delete-button" v-on:click="deleteTodo">削除</button>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { Todo } from "@/interface/todo";
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Todo } from "@/interface/todo";
 
 const route = useRoute();
 const router = useRouter();
@@ -38,14 +44,46 @@ const router = useRouter();
 /**
  * ローカルストレージのデータを取得・保持
  */
+const dataList = ref<Todo[]>(
+  JSON.parse(window.localStorage.getItem("todoList") ?? "")
+);
+const data: Todo | undefined = dataList.value.find(
+  (data: Todo) => data.id === Number(route.params.id)
+);
+
+const index: number = dataList.value.findIndex(
+  (data: Todo) => data.id === Number(route.params.id)
+);
+
+const title = ref(data?.title);
+const description = ref(data?.description);
+const startDate = ref(data?.startDate);
+const endDate = ref(data?.endDate);
 
 /**
  * 予定の更新処理
  */
-
+const updateTodo = () => {
+  const dataset: Todo = {
+    id: data?.id ?? 0,
+    status: data?.status ?? 0,
+    title: title?.value ?? "",
+    description: description?.value ?? "",
+    startDate: startDate?.value ?? "",
+    endDate: endDate?.value ?? "",
+  };
+  dataList.value[index] = dataset;
+  window.localStorage.setItem("todoList", JSON.stringify(dataList.value));
+  router.push("/");
+};
 /**
  * 予定の削除処理
  */
+const deleteTodo = () => {
+  dataList.value.splice(index, 1);
+  window.localStorage.setItem("todoList", JSON.stringify(dataList.value));
+  router.push("/");
+};
 </script>
 <style lang="postcss" scoped>
 .top-area {

@@ -10,6 +10,7 @@
           id="all"
           value="3"
           checked
+          @change="changeFilter()"
         />
       </li>
       <li>
@@ -20,6 +21,7 @@
           name="filter"
           id="not-yet"
           value="0"
+          @change="changeFilter()"
         />
       </li>
       <li>
@@ -30,6 +32,7 @@
           name="filter"
           id="working"
           value="1"
+          @change="changeFilter()"
         />
       </li>
       <li>
@@ -40,6 +43,7 @@
           name="filter"
           id="completed"
           value="2"
+          @change="changeFilter()"
         />
       </li>
     </ul>
@@ -65,6 +69,9 @@ const filter = ref(props.filterStatus);
 /**
  * フィルターの更新処理
  */
+const changeFilter = (): void => {
+  emit("changeFilter", filter.value);
+};
 </script>
 <style lang="postcss" scoped>
 .filter-area {

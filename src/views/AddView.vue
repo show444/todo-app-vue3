@@ -58,10 +58,10 @@ const addTodo = () => {
   const dataset: Todo = {
     id: id,
     status: 0,
-    title: "title",
-    description: "description",
-    startDate: "2022/12/12",
-    endDate: "2022/12/30",
+    title: title.value,
+    description: description.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
   };
   dataList.push(dataset);
   window.localStorage.setItem("todoList", JSON.stringify(dataList));
